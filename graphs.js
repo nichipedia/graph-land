@@ -1,13 +1,45 @@
-let cost = 5000;
+
+let campCost = 1500;
+let preacherCost = 1000;
+let bandCost = 600;
+let drinks = 400;
+
+let cost = campCost + preacherCost + bandCost + drinks;
 
 let studentCount = [];
 let costPerStudent = [];
 let showLine = [];
 
+let foodCost = (studentCount) => {
+  let cps = 500/50;
+  return 50 + (studentCount*cps) * 3;
+}
+
+
+let tbody = document.getElementById('costTable');
+
 for (let students = 1; students < 100; students += 4) {
+  let actualCost = cost + foodCost(students);
   studentCount.push(students);
-  costPerStudent.push(cost / students);
-  showLine.push(cost / 24);
+  costPerStudent.push(actualCost / students);
+  showLine.push(120);
+}
+
+for (let i = 18; i <= 100; i += 8) {
+    let row = document.createElement('tr');
+    let countData = document.createElement('td');
+    let costData = document.createElement('td');
+    let actualCost = cost + foodCost(i);
+    countData.innerHTML = i;
+    costData.innerHTML = `$${Math.round((actualCost/i)*100)/100}`;
+    if (actualCost/i > 120) {
+      row.classList.add('table-danger');
+    } else {
+      row.classList.add('table-success');
+    }
+    row.appendChild(countData);
+    row.appendChild(costData);
+    tbody.appendChild(row);
 }
 
 let lineChartData = {
@@ -27,6 +59,7 @@ let lineChartData = {
 // that is resolving to our chart container element. The Second parameter
 // is the actual data object.
 new Chartist.Line('.ct-chart', lineChartData, {
+  high: 400,
   series: {
     'series-1': {
       showPoint: false
@@ -41,7 +74,7 @@ new Chartist.Line('.ct-chart', lineChartData, {
     top: 20,
     right: 0,
     bottom: 30,
-    left: 10
+    left: 20
   },
   plugins: [
     Chartist.plugins.ctAxisTitle({
@@ -55,10 +88,10 @@ new Chartist.Line('.ct-chart', lineChartData, {
         textAnchor: "middle"
       },
       axisY: {
-        axisTitle: "Cost for Student",
+        axisTitle: "Cost per Student",
         axisClass: "ct-axis-title",
         offset: {
-          x: -10,
+          x: -20,
           y: -1
         },
         flipTitle: false
@@ -68,20 +101,25 @@ new Chartist.Line('.ct-chart', lineChartData, {
 });
 
 data = {
-  labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'],
-  series: [
-    [1, 2, 4, 8, 6, -2, -1, -4, -6, -2]
-  ]
+  labels: ['Preacher', 'Band', 'Food', 'Camp Grounds'],
+  series: [preacherCost, bandCost, foodCost(50), campCost]
 };
 
-var options = {
-  high: 10,
-  low: -10,
-  axisX: {
-    labelInterpolationFnc: function (value, index) {
-      return index % 2 === 0 ? value : null;
-    }
-  }
-};
 
-new Chartist.Bar('.costBar', data, options);
+
+new Chartist.Bar('.costBar', data, {
+  distributeSeries: true
+});
+
+let costForFifty = preacherCost + bandCost + foodCost(50) + campCost;
+
+document.getElementById('costHeader').innerHTML = `Est. Cost for 50: $${Math.round((costForFifty)*100)/100}`;
+
+new Chartist.Pie('.costPie', {
+  labels: ['Preacher', 'Band', 'Food', 'Camp Grounds'],
+  series: [preacherCost, bandCost, foodCost(50), campCost]
+}, {
+  chartPadding: 30,
+  labelOffset: 100,
+  labelDirection: 'explode',
+})
